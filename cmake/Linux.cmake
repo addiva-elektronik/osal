@@ -19,6 +19,10 @@ option (USE_SCHED_FIFO
   "Use SCHED_FIFO policy. May require extra privileges to run"
   OFF)
 
+option (USE_SYSLOG
+  "Use syslog instead of logging to stdout"
+  OFF)
+
 target_sources(osal PRIVATE
   src/linux/osal.c
   src/linux/osal_log.c
@@ -31,6 +35,7 @@ target_compile_options(osal
   -Werror
   -Wno-unused-parameter
   $<$<BOOL:${USE_SCHED_FIFO}>:-DUSE_SCHED_FIFO>
+  $<$<BOOL:${USE_SYSLOG}>:-DUSE_SYSLOG>
   INTERFACE
   $<$<CONFIG:Coverage>:--coverage>
   )

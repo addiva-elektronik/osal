@@ -16,12 +16,17 @@
 #include "osal_log.h"
 
 #include <stdarg.h>
+#ifndef USE_SYSLOG
 #include <stdio.h>
 #include <time.h>
+#else
+#include <syslog.h>
+#endif
 
 void os_log (uint8_t type, const char * fmt, ...)
 {
    va_list list;
+#ifndef USE_SYSLOG
    time_t rawtime;
    struct tm timestruct;
    char timestamp[10];
@@ -55,4 +60,33 @@ void os_log (uint8_t type, const char * fmt, ...)
    vprintf (fmt, list);
    va_end (list);
    fflush (stdout);
+#else
+   int prio;
+
+   switch (LOG_LEVEL_GET (type))
+   {
+   case LOG_LEVEL_DEBUG:
+      prio = LOG_DEBUG;
+      break;
+   case LOG_LEVEL_INFO:
+      prio = LOG_INFO;
+      break;
+   case LOG_LEVEL_WARNING:
+      prio = LOG_WARNING;
+      break;
+   case LOG_LEVEL_ERROR:
+      prio = LOG_ERR;
+      break;
+   case LOG_LEVEL_FATAL:
+      prio = LOG_CRIT;;
+      break;
+   default:
+      prio = LOG_NOTICE;
+      break;
+   }
+
+   va_start (list, fmt);
+   vsyslog (prio, fmt, list);
+   va_end (list);
+#endif
 }
